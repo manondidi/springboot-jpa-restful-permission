@@ -1,0 +1,28 @@
+spring:
+  # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: true
+
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/springboot-mvc-jpa?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: mysql
+    show-sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /springboot-mvc-jpa-demo
+
