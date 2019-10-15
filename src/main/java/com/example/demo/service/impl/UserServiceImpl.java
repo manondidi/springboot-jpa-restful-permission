@@ -7,11 +7,9 @@ import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +38,14 @@ public class UserServiceImpl implements UserService {
         }
         Token token = Token.generateToken();
         stringRedisTemplate.opsForValue().set(token.getToken(), userPo.getId().toString(), 7, TimeUnit.DAYS);
-        stringRedisTemplate.opsForList().rightPush(userPo.getId().toString(), token.getToken());
+        stringRedisTemplate.opsForSet().add(userPo.getId().toString(), token.getToken());
         return token;
+    }
+
+    @Override
+    public void unLogin(String userId, String token) {
+        stringRedisTemplate.opsForValue().set(token, null);
+        stringRedisTemplate.opsForSet().remove(userId, token);
     }
 
     @Override
@@ -56,4 +60,6 @@ public class UserServiceImpl implements UserService {
         }
         return dozerMapper.map(userPo, User.class);
     }
+
+
 }
