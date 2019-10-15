@@ -9,16 +9,22 @@ import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @Getter
 @Setter
+@Slf4j
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
@@ -38,7 +44,10 @@ public class UserServiceImpl implements UserService {
         }
         Token token = Token.generateToken();
         stringRedisTemplate.opsForValue().set(token.getToken(), userPo.getId().toString(), 7, TimeUnit.DAYS);
-        stringRedisTemplate.opsForSet().add(userPo.getId().toString(), token.getToken());
+        Set<String> set = stringRedisTemplate.opsForSet().members(userPo.getId().toString());
+        set.add(token.getToken());
+        String[] tokens = set.toArray(new String[set.size()]);
+        stringRedisTemplate.opsForSet().add(userPo.getId().toString(), tokens);
         return token;
     }
 

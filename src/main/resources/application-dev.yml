@@ -14,6 +14,7 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
+    timeout: 10000
 
   jpa:
     hibernate:
@@ -25,4 +26,7 @@ server:
   port: 8080
   servlet:
     context-path: /springboot-mvc-jpa-demo
+
+logging:
+  config: classpath:log4j2.xml
 

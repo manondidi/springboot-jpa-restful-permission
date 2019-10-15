@@ -17,4 +17,8 @@ public class Result<T> {
         return result;
     }
 
+    public static Result success() {
+        Result result = new Result(0, "success", null);
+        return result;
+    }
 }

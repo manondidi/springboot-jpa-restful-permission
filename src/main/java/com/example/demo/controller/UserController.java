@@ -27,11 +27,18 @@ public class UserController {
         return Result.success(token);
     }
 
+    @PostMapping("/user/unLogin")
+    public Result<Void> unLogin(@RequestParam String userId, @RequestParam String token) {
+        userService.unLogin(userId, token);
+        return Result.success();
+    }
+
     @GetMapping("/users/")
     public Result<User> findUserByToken(@RequestParam String token) {
         User userDto = userService.findUserByToken(token);
         return Result.success(userDto);
 
     }
+
 
 }

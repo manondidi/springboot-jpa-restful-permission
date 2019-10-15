@@ -7,4 +7,6 @@ public interface UserService {
     Token login(String user, String password);
 
     User findUserByToken(String token);
+
+    void unLogin(String userId, String token);
 }
