@@ -13,12 +13,14 @@ import java.util.Map;
 public class GlobalExceptionHanlder {
     @ExceptionHandler(value = BusinessException.class)
     public BusinessException.ExceptionResult onErrorHandler(BusinessException ex) {
+        ex.printStackTrace();
         log.error(ex.getMessage());
         return ex.getResult();
     }
 
     @ExceptionHandler(value = Exception.class)
     public BusinessException.ExceptionResult onErrorHandler(Exception ex) {
+        ex.printStackTrace();
         log.error(ex.getMessage());
         return BusinessException.ExceptionResult.builder().code(500).message(ex.getLocalizedMessage()).build();
     }

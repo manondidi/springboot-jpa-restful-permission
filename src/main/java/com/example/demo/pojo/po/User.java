@@ -3,6 +3,7 @@ package com.example.demo.pojo.po;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -11,14 +12,14 @@ public class User {
     @Id
     @GeneratedValue
     private Long id;
-    @Column(nullable = false, length = 32, unique = true)
     private String userName;
-    @Column(nullable = false, length = 32)
     private String password;
-    @Column(nullable = false, length = 32, unique = true)
     private String mail;
-    @Column(nullable = false, length = 32, unique = true)
     private String tel;
-    @Column()
     private String avatar;
+
+    @ManyToMany(fetch = FetchType.EAGER)//立即从数据库中进行加载数据;
+    @JoinTable(name = "t_user_role", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "role_id")})
+    private List<Role> roleList;// 一个用户具有多个角色
+
 }

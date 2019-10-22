@@ -10,16 +10,16 @@ import com.github.dozermapper.core.Mapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Getter
@@ -37,37 +37,14 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Token login(String user, String password) {
-        com.example.demo.pojo.po.User userPo = userRepository.findUserByUserNameOrMailOrTel(user, user, user);
-        if (userPo == null || !userPo.getPassword().equals(password)) {
-            throw new BusinessException(BusinessExceptionEnum.LOGIN_FAIL);
-        }
-        Token token = Token.generateToken();
-        stringRedisTemplate.opsForValue().set(token.getToken(), userPo.getId().toString(), 7, TimeUnit.DAYS);
-        Set<String> set = stringRedisTemplate.opsForSet().members(userPo.getId().toString());
-        set.add(token.getToken());
-        String[] tokens = set.toArray(new String[set.size()]);
-        stringRedisTemplate.opsForSet().add(userPo.getId().toString(), tokens);
-        return token;
-    }
-
-    @Override
-    public void unLogin(String userId, String token) {
-        stringRedisTemplate.opsForValue().set(token, null);
-        stringRedisTemplate.opsForSet().remove(userId, token);
-    }
-
-    @Override
-    public User findUserByToken(String token) {
-        String userId = stringRedisTemplate.opsForValue().get(token);
-        if (userId == null) {
-            throw new BusinessException(BusinessExceptionEnum.USER_UNLOGIN);
-        }
-        com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(userId)).get();
-        if (userPo == null) {
-            throw new BusinessException(BusinessExceptionEnum.USER_UNLOGIN);
-        }
-        return dozerMapper.map(userPo, User.class);
+    public List<User> getAllUsers() {
+        List<com.example.demo.pojo.po.User> users = userRepository.findAll();
+        return Optional
+                .ofNullable(users)
+                .orElse(new ArrayList<>())
+                .stream()
+                .map(userPo -> dozerMapper.map(userPo, User.class))
+                .collect(Collectors.toList());
     }
 
 
