@@ -8,6 +8,8 @@ import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.subject.Subject;
@@ -37,9 +39,14 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public Result<Void> unLogin() {
+    public Result<Void> logout() {
         SecurityUtils.getSubject().logout();
         return Result.success();
+    }
+
+    @GetMapping("/unauth")
+    public void unLogin() {
+        throw new UnauthenticatedException();
     }
 
 
