@@ -1,5 +1,6 @@
-package com.example.demo.dao;
+package com.example.demo.common;
 
+import com.example.demo.dao.UserRepository;
 import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.po.User;

@@ -31,11 +31,11 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/login")
-    public Result<Void> login(@RequestParam String user, @RequestParam String password) {
+    public Result<Token> login(@RequestParam String user, @RequestParam String password) {
         UsernamePasswordToken token = new UsernamePasswordToken(user, password);
         Subject currentUser = SecurityUtils.getSubject();
         currentUser.login(token);
-        return Result.success();
+        return Result.success(new Token(currentUser.getSession().getId().toString()));
     }
 
     @PostMapping("/logout")

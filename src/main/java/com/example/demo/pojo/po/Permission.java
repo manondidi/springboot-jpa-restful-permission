@@ -3,12 +3,13 @@ package com.example.demo.pojo.po;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "t_permission")
-public class Permission {
+public class Permission implements Serializable {
     @Id
     @GeneratedValue
     private long id;//主键.
