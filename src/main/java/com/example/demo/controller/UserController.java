@@ -11,6 +11,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.subject.Subject;
 import org.hibernate.annotations.Parameter;
@@ -50,7 +51,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/users/")
+    @GetMapping("/users")
     @RequiresAuthentication
     public Result<List<User>> getUserList() {
         return Result.success(userService.getAllUsers());

@@ -42,7 +42,6 @@ public class CustomRealm extends AuthorizingRealm {
         String user = (String) authenticationToken.getPrincipal();
         String password = new String((char[]) authenticationToken.getCredentials());
         User userPo = userRepository.findUserByUserNameOrMailOrTel(user, user, user);
-        log.info("doGetAuthenticationInfo =======" + user);
         if (userPo == null || !userPo.getPassword().equals(password)) {
             throw new AccountException("用户名或密码错误");
         }
