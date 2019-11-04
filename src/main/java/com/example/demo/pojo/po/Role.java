@@ -1,5 +1,6 @@
 package com.example.demo.pojo.po;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "t_role")
+@Builder
 public class Role implements Serializable {
 
     @Id

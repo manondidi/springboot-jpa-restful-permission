@@ -3,6 +3,7 @@ package com.example.demo.controller;
 
 import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
+import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,5 @@ public class UserController {
     public Result<List<User>> getUserList() {
         return Result.success(userService.getAllUsers());
     }
-
 
 }
