@@ -4,6 +4,7 @@ package com.example.demo.controller;
 import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Permission;
+import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,7 @@ import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.subject.Subject;
 import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,6 +54,18 @@ public class UserController {
     @RequiresAuthentication
     public Result<List<User>> getUserList() {
         return Result.success(userService.getAllUsers());
+    }
+
+
+    @PostMapping("/roles/")
+    public Result<Role> addRole(@RequestParam String name, @RequestParam String desc) {
+        return Result.success(userService.addRole(name, desc));
+    }
+
+    @DeleteMapping("/roles/{id}")
+    public Result<Void> deleteRole(@PathVariable String id) {
+        userService.deleteRole(id);
+        return Result.success();
     }
 
 }
