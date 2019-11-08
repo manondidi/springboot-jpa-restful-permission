@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.persistence.Column;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,28 +59,32 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deletePermission(String id) {
-
         Permission permission = permissionRepository
                 .findById(Long.parseLong(id))
                 .orElseThrow(() ->
                         new BusinessException(BusinessExceptionEnum.PERMISSION_NOT_FOUND));
+        List<Long> pids = new ArrayList<>();
+        pids.add(permission.getId());
+        //找到这个permission的孩子结点
+        List<Permission> children = permissionRepository.getPermissionsByParentId(pids);
         List<Permission> permissionList = new ArrayList<>();
         permissionList.add(permission);
+        permissionList.addAll(children);
+        Set<Long> toDeleteSet = permissionList.stream().map(Permission::getId).collect(Collectors.toSet());
         List<Role> roleList = roleRepository
                 .findAll(Example.of(Role.builder()
                         .permissions(permissionList)
                         .build()));
         roleList.stream().forEach((role) ->
                 role.getPermissions()
-                        .removeIf(permission1 ->
-                                permission.getId() == permission1.getId()));
+                        .removeIf(permission1 -> toDeleteSet.contains(permission1.getId())));
         roleRepository.saveAll(roleList);
         permissionRepository.deleteById(permission.getId());
     }
 
-    public List<com.example.demo.pojo.dto.Permission> getPermissions(List<String> ids) {
-        List<Long> idList = ids.stream().map((id) -> Long.parseLong(id)).collect(Collectors.toList());
-        List<Permission> permissionPoList = permissionRepository.getPermissionsById(idList);
+    @Override
+    public List<com.example.demo.pojo.dto.Permission> getAllPermissionsTree() {
+        List<Permission> permissionPoList = permissionRepository.findAll();
         return com.example.demo.pojo.dto.Permission.convert(permissionPoList);
     }
 

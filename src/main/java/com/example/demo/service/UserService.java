@@ -14,6 +14,8 @@ public interface UserService {
 
     void deletePermission(String id);
 
+    List<com.example.demo.pojo.dto.Permission> getAllPermissionsTree();
+
     com.example.demo.pojo.dto.Permission addPermission(String name, String resourceType, String permission, @Nullable String parentId);
 
     Role addRole(String name, String description);
