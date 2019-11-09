@@ -16,6 +16,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Getter
@@ -47,7 +49,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        List<com.example.demo.pojo.po.User> users = userRepository.findAll();
+        Sort sort = new Sort(Sort.Direction.DESC, "id");
+        List<com.example.demo.pojo.po.User> users = userRepository.findAll(sort);
         return Optional
                 .ofNullable(users)
                 .orElse(new ArrayList<>())
@@ -58,28 +61,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deletePermission(String id) {
-        Permission permission = permissionRepository
-                .findById(Long.parseLong(id))
-                .orElseThrow(() ->
-                        new BusinessException(BusinessExceptionEnum.PERMISSION_NOT_FOUND));
-        List<Long> pids = new ArrayList<>();
-        pids.add(permission.getId());
-        //找到这个permission的孩子结点
+    public void deletePermissions(List<String> ids) {
+        List<Permission> permissions = permissionRepository
+                .findAllById(ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList()));
+        if (permissions.isEmpty()) {
+            throw new BusinessException(BusinessExceptionEnum.PERMISSION_NOT_FOUND);
+        }
+        List<Long> pids = permissions.stream().map(Permission::getId).collect(Collectors.toList());
+        //找到permission的孩子结点
         List<Permission> children = permissionRepository.getPermissionsByParentId(pids);
-        List<Permission> permissionList = new ArrayList<>();
-        permissionList.add(permission);
-        permissionList.addAll(children);
-        Set<Long> toDeleteSet = permissionList.stream().map(Permission::getId).collect(Collectors.toSet());
+        List<Permission> toDeletePermissionList = new ArrayList<>();
+        toDeletePermissionList.addAll(permissions);
+        toDeletePermissionList.addAll(children);
+        Set<Long> toDeleteSet = toDeletePermissionList.stream().map(Permission::getId).collect(Collectors.toSet());
         List<Role> roleList = roleRepository
                 .findAll(Example.of(Role.builder()
-                        .permissions(permissionList)
+                        .permissions(toDeletePermissionList)
                         .build()));
         roleList.stream().forEach((role) ->
                 role.getPermissions()
                         .removeIf(permission1 -> toDeleteSet.contains(permission1.getId())));
         roleRepository.saveAll(roleList);
-        permissionRepository.deleteById(permission.getId());
+        permissionRepository.deleteAll(toDeletePermissionList);
     }
 
     @Override
@@ -90,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public com.example.demo.pojo.dto.Permission addPermission(String name, String resourceType, String permission, @Nullable String parentId) {
+    public com.example.demo.pojo.dto.Permission addPermission(String name, String permission, @Nullable String parentId) {
         if (parentId != null) {
             Permission parent = permissionRepository.findById(Long.parseLong(parentId))
                     .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.PERMISSION_PARENT_NOT_FOUND));
@@ -114,6 +117,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<com.example.demo.pojo.dto.Role> getRoles() {
+        Sort sort = new Sort(Sort.Direction.DESC, "id");
+        List<Role> roles = roleRepository.findAll(sort);
+        return roles.stream().map((rolePo) ->
+                com.example.demo.pojo.dto.Role.builder()
+                        .available(rolePo.getAvailable())
+                        .description(rolePo.getDescription())
+                        .id(rolePo.getId())
+                        .name(rolePo.getName())
+                        .permissions(com.example.demo.pojo.dto.Permission.convert(rolePo.getPermissions()))
+                        .build()
+        ).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void deleteRole(String id) {
         Role role = roleRepository
@@ -132,18 +150,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Role editRole(com.example.demo.pojo.dto.Role role, List<String> permissionIds) {
-        Role oldRole = roleRepository.findById(role.getId())
+    public Role editRole(String id, String name, String description, Boolean available, List<String> permissionIds) {
+        Role oldRole = roleRepository.findById(Long.parseLong(id))
                 .orElseThrow(() ->
                         new BusinessException(BusinessExceptionEnum.ROLE_NOT_FOUND));
+        if (permissionIds == null) {
+            permissionIds = new ArrayList<>();
+        }
         List<Permission> permissionList = permissionRepository
                 .findAllById(permissionIds.stream().map(Long::parseLong).collect(Collectors.toList()));
         Role newRole = Role.builder()
-                .id(role.getId())
+                .id(Long.parseLong(id))
                 .userList(oldRole.getUserList())//不可编辑
-                .available(role.getAvailable())
-                .description(role.getDescription())
-                .name(role.getName())
+                .available(available)
+                .description(description)
+                .name(name)
                 .permissions(permissionList)
                 .build();
         roleRepository.save(newRole);

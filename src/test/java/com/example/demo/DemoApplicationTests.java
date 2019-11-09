@@ -25,10 +25,10 @@ public class DemoApplicationTests {
 
     @Test
     public void test() throws JsonProcessingException {
-        List<Permission> permissionDtos = userService.getPermissions(new ArrayList<>());
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(permissionDtos);
-        log.info(json);
+//        List<Permission> permissionDtos = userService.getPermissions(new ArrayList<>());
+//        ObjectMapper mapper = new ObjectMapper();
+//        String json = mapper.writeValueAsString(permissionDtos);
+//        log.info(json);
     }
 
 }

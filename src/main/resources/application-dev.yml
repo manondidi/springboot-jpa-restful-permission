@@ -21,6 +21,8 @@ spring:
       ddl-auto: update
     database: mysql
     show-sql: true
+  jackson:
+    default-property-inclusion: always
 
 server:
   port: 8080

@@ -12,16 +12,18 @@ public interface UserService {
 
     List<User> getAllUsers();
 
-    void deletePermission(String id);
+    void deletePermissions(List<String> ids);
 
     List<com.example.demo.pojo.dto.Permission> getAllPermissionsTree();
 
-    com.example.demo.pojo.dto.Permission addPermission(String name, String resourceType, String permission, @Nullable String parentId);
+    com.example.demo.pojo.dto.Permission addPermission(String name, String permission, @Nullable String parentId);
 
     Role addRole(String name, String description);
+
+    List<com.example.demo.pojo.dto.Role> getRoles();
 
     void deleteRole(String id);
 
 
-    Role editRole(com.example.demo.pojo.dto.Role role, List<String> permissionIds);
+    Role editRole(String id, String name, String description, Boolean available, List<String> permissionIds);
 }

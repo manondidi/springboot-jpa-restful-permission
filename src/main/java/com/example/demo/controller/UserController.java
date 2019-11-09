@@ -1,12 +1,13 @@
 package com.example.demo.controller;
 
 
+import com.example.demo.pojo.dto.Permission;
 import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
-import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
+import com.sun.istack.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -20,6 +21,9 @@ import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -62,10 +66,44 @@ public class UserController {
         return Result.success(userService.addRole(name, desc));
     }
 
+
     @DeleteMapping("/roles/{id}")
     public Result<Void> deleteRole(@PathVariable String id) {
         userService.deleteRole(id);
         return Result.success();
     }
+
+    @GetMapping("/roles/")
+    public Result<List<Role>> getRoles() {
+        return Result.success(userService.getRoles());
+
+    }
+
+    @PutMapping("/roles/{id}")
+    public Result<Role> editRole(@PathVariable String id,
+                                 @RequestParam String name,
+                                 @RequestParam String description,
+                                 @RequestParam Boolean available,
+                                 @RequestParam String[] permissionIds) {
+
+        return Result.success(userService.editRole(id, name, description, available, Arrays.asList(permissionIds)));
+    }
+
+    @GetMapping("/permissions/")
+    public Result<List<Permission>> getAllPermisstionsTree() {
+        return Result.success(userService.getAllPermissionsTree());
+    }
+
+    @PostMapping("/permissions/")
+    public Result<Permission> addPermisstion(@RequestParam String name, @RequestParam String permission, @RequestParam @Nullable String parentId) {
+        return Result.success(userService.addPermission(name, permission, parentId));
+    }
+
+    @DeleteMapping("/permissions/")
+    public Result<Void> deletePermisstions(@RequestParam String[] ids) {
+        userService.deletePermissions(Arrays.asList(ids));
+        return Result.success();
+    }
+
 
 }

@@ -1,6 +1,5 @@
 package com.example.demo.pojo.dto;
 
-import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
