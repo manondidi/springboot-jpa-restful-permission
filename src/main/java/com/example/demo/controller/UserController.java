@@ -63,8 +63,8 @@ public class UserController {
 
 
     @PostMapping("/roles/")
-    public Result<Role> addRole(@RequestParam String name, @RequestParam String desc) {
-        return Result.success(userService.addRole(name, desc));
+    public Result<Role> addRole(@RequestParam String name, @RequestParam String desc, @RequestParam String[] permissionIds) {
+        return Result.success(userService.addRole(name, desc, Arrays.asList(permissionIds)));
     }
 
 
@@ -83,11 +83,11 @@ public class UserController {
     @PutMapping("/roles/{id}")
     public Result<Role> editRole(@PathVariable String id,
                                  @RequestParam String name,
-                                 @RequestParam String description,
+                                 @RequestParam String desc,
                                  @RequestParam Boolean available,
                                  @RequestParam String[] permissionIds) {
 
-        return Result.success(userService.editRole(id, name, description, available, Arrays.asList(permissionIds)));
+        return Result.success(userService.editRole(id, name, desc, available, Arrays.asList(permissionIds)));
     }
 
     @GetMapping("/permissions/")

@@ -1,5 +1,6 @@
 package com.example.demo.pojo.po;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,4 @@ public class Permission implements Serializable {
     private Long parentId; //父编号
     private Boolean available;
 
-    @ManyToMany
-    @JoinTable(name = "t_role_permission", joinColumns = {@JoinColumn(name = "permission_id")}, inverseJoinColumns = {@JoinColumn(name = "role_id")})
-    private List<Role> roles;
 }

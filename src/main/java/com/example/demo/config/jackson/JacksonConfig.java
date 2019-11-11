@@ -21,9 +21,9 @@ public class JacksonConfig {
         /** 为objectMapper注册一个带有SerializerModifier的Factory */
         objectMapper.setSerializerFactory(objectMapper.getSerializerFactory()
                 .withSerializerModifier(new MyBeanSerializerModifier()));
-        SerializerProvider serializerProvider = objectMapper.getSerializerProvider();
-        serializerProvider.setNullValueSerializer(new CustomizeNullJsonSerializer
-                .NullObjectJsonSerializer());
+//        SerializerProvider serializerProvider = objectMapper.getSerializerProvider();
+//        serializerProvider.setNullValueSerializer(new CustomizeNullJsonSerializer
+//                .NullObjectJsonSerializer());
         return objectMapper;
     }
 }

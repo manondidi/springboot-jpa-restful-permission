@@ -106,8 +106,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Role addRole(String name, String description) {
-        Role role = Role.builder().name(name).description(description).available(true).build();
+    public Role addRole(String name, String description, List<String> permissionIds) {
+        List<Permission> permissionList = permissionRepository
+                .findAllById(permissionIds.stream().map(Long::parseLong).collect(Collectors.toList()));
+        Role role = Role.builder().name(name).description(description).available(true).permissions(permissionList).build();
         roleRepository.saveAndFlush(role);
         return role;
     }
@@ -157,7 +159,6 @@ public class UserServiceImpl implements UserService {
                 .findAllById(permissionIds.stream().map(Long::parseLong).collect(Collectors.toList()));
         Role newRole = Role.builder()
                 .id(Long.parseLong(id))
-                .userList(oldRole.getUserList())//不可编辑
                 .available(available)
                 .description(description)
                 .name(name)
