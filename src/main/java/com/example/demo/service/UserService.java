@@ -12,7 +12,7 @@ public interface UserService {
 
     List<User> getAllUsers();
 
-    void deletePermissions(List<String> ids);
+    void deletePermissions(String id);
 
     List<com.example.demo.pojo.dto.Permission> getAllPermissionsTree();
 

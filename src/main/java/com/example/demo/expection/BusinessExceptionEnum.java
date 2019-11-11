@@ -6,7 +6,7 @@ public enum BusinessExceptionEnum {
     ROLE_NOT_FOUND(404, "角色不存在"),
     PERMISSION_NOT_FOUND(404, "权限不存在"),
     PERMISSION_PARENT_NOT_FOUND(404, "父权限不存在"),
-    PERMISSION_PARENT_NOT_MENU(404, "不可为按钮类型添加子权限");
+    PERMISSION_DELETE_HAS_CHIRLDREN(500, "该权限含有子权限,不可直接删除");
 
 
     public int code;

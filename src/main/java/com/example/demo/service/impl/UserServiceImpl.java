@@ -10,6 +10,7 @@ import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
+import com.google.common.collect.Lists;
 import com.sun.istack.Nullable;
 import lombok.Getter;
 import lombok.Setter;
@@ -61,29 +62,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deletePermissions(List<String> ids) {
-        List<Permission> permissions = permissionRepository
-                .findAllById(ids.stream().map(id -> Long.parseLong(id)).collect(Collectors.toList()));
-        if (permissions.isEmpty()) {
-            throw new BusinessException(BusinessExceptionEnum.PERMISSION_NOT_FOUND);
+    public void deletePermissions(String id) {
+        Permission permission = permissionRepository
+                .findById(Long.parseLong(id))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.PERMISSION_NOT_FOUND));
+        if (permissionRepository.count(Example.of(Permission.builder().parentId(Long.parseLong(id)).build())) > 0) {
+            throw new BusinessException(BusinessExceptionEnum.PERMISSION_DELETE_HAS_CHIRLDREN);
         }
-        List<Long> pids = permissions.stream().map(Permission::getId).collect(Collectors.toList());
-        //找到permission的孩子结点
-        List<Permission> children = permissionRepository.getPermissionsByParentId(pids);
-        List<Permission> toDeletePermissionList = new ArrayList<>();
-        toDeletePermissionList.addAll(permissions);
-        toDeletePermissionList.addAll(children);
-        Set<Long> toDeleteSet = toDeletePermissionList.stream().map(Permission::getId).collect(Collectors.toSet());
         List<Role> roleList = roleRepository
                 .findAll(Example.of(Role.builder()
-                        .permissions(toDeletePermissionList)
+                        .permissions(Lists.newArrayList(permission))
                         .build()));
         roleList.stream().forEach((role) ->
                 role.getPermissions()
-                        .removeIf(permission1 -> toDeleteSet.contains(permission1.getId())));
+                        .removeIf(permission1 -> permission1.getId().equals(permission.getId())));
         roleRepository.saveAll(roleList);
-        permissionRepository.deleteAll(toDeletePermissionList);
+        permissionRepository.delete(permission);
     }
+
 
     @Override
     public List<com.example.demo.pojo.dto.Permission> getAllPermissionsTree() {
@@ -144,7 +140,7 @@ public class UserServiceImpl implements UserService {
         userList.stream().forEach((user) ->
                 user.getRoleList()
                         .removeIf(role1 ->
-                                role1.getId() == role.getId()));
+                                role1.getId().equals(role.getId())));
         userRepository.saveAll(userList);
         roleRepository.deleteById(role.getId());
     }

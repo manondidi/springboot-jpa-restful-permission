@@ -22,7 +22,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Permission implements Serializable {
-    private long id;//主键.
+    private Long id;//主键.
     private String name;//名称.
     private String permission; //权限字符串,menu例子：role:*，button例子：role:create,role:update,role:delete,role:view
     private Boolean available;
