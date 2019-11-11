@@ -1,8 +1,6 @@
-package com.example.demo.config;
+package com.example.demo.config.shiro;
 
-import com.example.demo.common.MySessionManager;
 import org.apache.shiro.mgt.SecurityManager;
-import com.example.demo.common.CustomRealm;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConfiguration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

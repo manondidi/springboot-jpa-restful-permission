@@ -1,4 +1,4 @@
-package com.example.demo.common;
+package com.example.demo.config.shiro;
 
 import com.example.demo.dao.UserRepository;
 import com.example.demo.pojo.po.Permission;

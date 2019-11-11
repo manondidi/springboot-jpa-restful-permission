@@ -1,12 +1,15 @@
 package com.example.demo.controller;
 
 
+import com.example.demo.expection.BusinessException;
+import com.example.demo.expection.BusinessExceptionEnum;
 import com.example.demo.pojo.dto.Permission;
 import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
+import com.github.dozermapper.core.Mapper;
 import com.sun.istack.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -22,6 +25,7 @@ import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,12 +39,34 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Resource
+    private Mapper dozerMapper;
+
     @PostMapping("/login")
     public Result<Token> login(@RequestParam String user, @RequestParam String password) {
         UsernamePasswordToken token = new UsernamePasswordToken(user, password);
         Subject currentUser = SecurityUtils.getSubject();
         currentUser.login(token);
         return Result.success(new Token(currentUser.getSession().getId().toString()));
+    }
+
+
+    @GetMapping("/users/{id}")
+    public Result<User> getUser(@PathVariable String id) {
+        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (Long.parseLong(id) == (currentUser.getId())) {
+           return getCurrentUser();
+        } else {
+            throw new BusinessException(BusinessExceptionEnum.COMMON_HAS_NO_PERMISSION);
+        }
+
+    }
+
+    @GetMapping("/currentUser")
+    public Result<User> getCurrentUser() {
+        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        User userDto = dozerMapper.map(currentUser, User.class);
+        return Result.success(userDto);
     }
 
     @PostMapping("/logout")
@@ -56,7 +82,6 @@ public class UserController {
 
 
     @GetMapping("/users")
-    @RequiresAuthentication
     public Result<List<User>> getUserList() {
         return Result.success(userService.getAllUsers());
     }
@@ -105,6 +130,4 @@ public class UserController {
         userService.deletePermissions(id);
         return Result.success();
     }
-
-
 }

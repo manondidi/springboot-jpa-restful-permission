@@ -15,7 +15,5 @@ public class User {
     private String mail;
     private String tel;
     private String avatar;
-
-    private List<com.example.demo.pojo.po.Permission> permissions;
-    private List<com.example.demo.pojo.dto.Role> roles;
+    private List<com.example.demo.pojo.po.Role> roleList;
 }
