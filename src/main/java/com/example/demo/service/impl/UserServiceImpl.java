@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.config.shiro.MyShiroRealm;
 import com.example.demo.dao.PermissionRepository;
 import com.example.demo.dao.RoleRepository;
 import com.example.demo.dao.UserRepository;
@@ -8,6 +9,7 @@ import com.example.demo.expection.BusinessExceptionEnum;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
+import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
 import com.google.common.collect.Lists;
@@ -78,6 +80,7 @@ public class UserServiceImpl implements UserService {
                         .removeIf(permission1 -> permission1.getId().equals(permission.getId())));
         roleRepository.saveAll(roleList);
         permissionRepository.delete(permission);
+        MyShiroRealm.reloadAuthorizing();
     }
 
 
@@ -90,15 +93,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public com.example.demo.pojo.dto.Permission addPermission(String name, String permission, @Nullable String parentId) {
-        if (parentId != null) {
-            Permission parent = permissionRepository.findById(Long.parseLong(parentId))
-                    .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.PERMISSION_PARENT_NOT_FOUND));
-        }
         Permission permissionPo = Permission.builder()
                 .name(name)
                 .permission(permission)
-                .parentId(Long.parseLong(parentId))
                 .build();
+        if (parentId != null) {
+            Permission parent = permissionRepository.findById(Long.parseLong(parentId))
+                    .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.PERMISSION_PARENT_NOT_FOUND));
+            permissionPo.setParentId(Long.parseLong(parentId));
+        }
         permissionRepository.saveAndFlush(permissionPo);
         com.example.demo.pojo.dto.Permission permissionDto = dozerMapper.map(permissionPo, com.example.demo.pojo.dto.Permission.class);
         permissionDto.setChildren(new ArrayList<>());
@@ -145,6 +148,7 @@ public class UserServiceImpl implements UserService {
                                 role1.getId().equals(role.getId())));
         userRepository.saveAll(userList);
         roleRepository.deleteById(role.getId());
+        MyShiroRealm.reloadAuthorizing();
     }
 
     @Override
@@ -165,7 +169,27 @@ public class UserServiceImpl implements UserService {
                 .permissions(permissionList)
                 .build();
         roleRepository.save(newRole);
+        MyShiroRealm.reloadAuthorizing();
         return newRole;
+    }
+
+    @Override
+    public User editUserRole(String userId, List<String> roleIds) {
+        com.example.demo.pojo.po.User user = userRepository.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
+        List<Role> roles = roleRepository.findAllById(roleIds.stream().map(Long::parseLong).collect(Collectors.toList()));
+        user.setRoleList(roles);
+        userRepository.saveAndFlush(user);
+        MyShiroRealm.reloadAuthorizing();
+        return dozerMapper.map(user, User.class);
+    }
+
+    @Override
+    public User getUser(String id) {
+        com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
+
+        return dozerMapper.map(userPo, User.class);
     }
 
 

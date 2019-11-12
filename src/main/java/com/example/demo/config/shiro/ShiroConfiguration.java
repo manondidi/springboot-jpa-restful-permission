@@ -74,8 +74,8 @@ public class ShiroConfiguration {
     }
 
     @Bean
-    public CustomRealm myShiroRealm() {
-        CustomRealm myShiroRealm = new CustomRealm();
+    public MyShiroRealm myShiroRealm() {
+        MyShiroRealm myShiroRealm = new MyShiroRealm();
         return myShiroRealm;
     }
 

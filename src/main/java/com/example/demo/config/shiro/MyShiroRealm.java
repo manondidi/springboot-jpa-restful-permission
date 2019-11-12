@@ -11,6 +11,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.Set;
 
 @Slf4j
 @Data
-public class CustomRealm extends AuthorizingRealm {
+public class MyShiroRealm extends AuthorizingRealm {
     @Autowired
     private UserRepository userRepository;
 
@@ -46,5 +47,18 @@ public class CustomRealm extends AuthorizingRealm {
             throw new AccountException("用户名或密码错误");
         }
         return new SimpleAuthenticationInfo(userPo, userPo.getPassword(), getName());
+    }
+
+    public void clearAuthz(){
+        this.clearCachedAuthorizationInfo(SecurityUtils.getSubject().getPrincipals());
+    }
+
+    /**
+     * shiro刷新权限
+     */
+    public static void reloadAuthorizing() {
+        RealmSecurityManager rsm = (RealmSecurityManager)SecurityUtils.getSecurityManager();
+        MyShiroRealm realm = (MyShiroRealm)rsm.getRealms().iterator().next();
+        realm.clearAuthz();
     }
 }
