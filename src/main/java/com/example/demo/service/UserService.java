@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.pojo.dto.PageInfo;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
@@ -11,7 +12,8 @@ import java.util.List;
 
 public interface UserService {
 
-    List<User> getAllUsers();
+
+    PageInfo<User> getUsers(String search, int pageNum, int pageSize);
 
     void deletePermissions(String id);
 

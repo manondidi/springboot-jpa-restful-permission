@@ -1,9 +1,9 @@
 package com.example.demo.controller;
 
 
-import com.example.demo.config.shiro.MyShiroRealm;
 import com.example.demo.expection.BusinessException;
 import com.example.demo.expection.BusinessExceptionEnum;
+import com.example.demo.pojo.dto.PageInfo;
 import com.example.demo.pojo.dto.Permission;
 import com.example.demo.pojo.dto.Token;
 import com.example.demo.pojo.dto.User;
@@ -11,25 +11,18 @@ import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
-import com.sun.istack.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.UnauthenticatedException;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.apache.shiro.authz.annotation.RequiresUser;
 import org.apache.shiro.subject.Subject;
-import org.hibernate.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -72,6 +65,7 @@ public class UserController {
     }
 
     @GetMapping("/currentUser")
+    @RequiresAuthentication
     public Result<User> getCurrentUser() {
         com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
         User userDto = dozerMapper.map(currentUser, User.class);
@@ -79,6 +73,7 @@ public class UserController {
     }
 
     @PostMapping("/logout")
+    @RequiresAuthentication
     public Result<Void> logout() {
         SecurityUtils.getSubject().logout();
         return Result.success();
@@ -91,9 +86,9 @@ public class UserController {
 
 
     @GetMapping("/users")
-    @RequiresPermissions("role:view")
-    public Result<List<User>> getUserList() {
-        return Result.success(userService.getAllUsers());
+    @RequiresPermissions("user:view")
+    public Result<PageInfo<User>> getUserList(@RequestParam(required = false) String search, @RequestParam int pageNum, @RequestParam int pageSize) {
+        return Result.success(userService.getUsers(search, pageNum, pageSize));
     }
 
 
@@ -113,7 +108,7 @@ public class UserController {
 
     @GetMapping("/roles/")
     @RequiresPermissions("role:view")
-    public Result<List<Role>> getRoles() {
+    public Result<List<com.example.demo.pojo.dto.Role>> getRoles() {
         return Result.success(userService.getRoles());
 
     }

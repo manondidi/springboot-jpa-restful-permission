@@ -6,10 +6,10 @@ import com.example.demo.dao.RoleRepository;
 import com.example.demo.dao.UserRepository;
 import com.example.demo.expection.BusinessException;
 import com.example.demo.expection.BusinessExceptionEnum;
+import com.example.demo.pojo.dto.PageInfo;
 import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
-import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
 import com.github.dozermapper.core.Mapper;
 import com.google.common.collect.Lists;
@@ -18,8 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Getter
@@ -49,18 +47,26 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-
     @Override
-    public List<User> getAllUsers() {
+    public PageInfo<User> getUsers(String search, int pageNum, int pageSize) {
         Sort sort = new Sort(Sort.Direction.DESC, "id");
-        List<com.example.demo.pojo.po.User> users = userRepository.findAll(sort);
-        return Optional
-                .ofNullable(users)
-                .orElse(new ArrayList<>())
-                .stream()
-                .map(userPo -> dozerMapper.map(userPo, User.class))
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        Page<com.example.demo.pojo.po.User> page = userRepository
+                .findAll(Example.of(com.example.demo.pojo.po.User.builder()
+                                .userName(search)
+                                .tel(search)
+                                .mail(search)
+                                .build(),
+                        ExampleMatcher.matchingAny()
+                                .withMatcher("userName", ExampleMatcher.GenericPropertyMatchers.contains())
+                                .withMatcher("tel", ExampleMatcher.GenericPropertyMatchers.contains())
+                                .withMatcher("mail", ExampleMatcher.GenericPropertyMatchers.contains())
+                ), pageable);
+        PageInfo<User> userPageInfo = new PageInfo<User>(page.getTotalElements(), page.getSize(), page.getNumber(),
+                page.get().map(userPo -> dozerMapper.map(userPo, User.class)).collect(Collectors.toList()));
+        return userPageInfo;
     }
+
 
     @Override
     @Transactional
