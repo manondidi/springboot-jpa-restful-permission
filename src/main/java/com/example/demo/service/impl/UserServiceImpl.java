@@ -49,6 +49,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageInfo<User> getUsers(String search, int pageNum, int pageSize) {
+        if (search == null) {
+            search = "";
+        }
         Sort sort = new Sort(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
         Page<com.example.demo.pojo.po.User> page = userRepository
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
                                 .withMatcher("mail", ExampleMatcher.GenericPropertyMatchers.contains())
                 ), pageable);
         PageInfo<User> userPageInfo = new PageInfo<User>(page.getTotalElements(), page.getSize(), page.getNumber(),
-                page.get().map(userPo -> dozerMapper.map(userPo, User.class)).collect(Collectors.toList()));
+                page.getContent().stream().map(userPo -> dozerMapper.map(userPo, User.class)).collect(Collectors.toList()));
         return userPageInfo;
     }
 

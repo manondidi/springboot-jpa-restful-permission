@@ -135,6 +135,7 @@ public class UserController {
     public Result<Permission> addPermisstion(@RequestParam String name,
                                              @RequestParam String permission,
                                              @RequestParam(required = false) String parentId) {
+
         return Result.success(userService.addPermission(name, permission, parentId));
     }
 
