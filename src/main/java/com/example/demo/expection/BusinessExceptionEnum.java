@@ -8,7 +8,8 @@ public enum BusinessExceptionEnum {
     PERMISSION_NOT_FOUND(404, "权限不存在"),
     PERMISSION_PARENT_NOT_FOUND(404, "父权限不存在"),
     PERMISSION_DELETE_HAS_CHIRLDREN(500, "该权限含有子权限,不可直接删除"),
-    COMMON_HAS_NO_PERMISSION(403, "你没有这个操作的权限,禁止访问");
+    COMMON_HAS_NO_PERMISSION(403, "你没有这个操作的权限,禁止访问"),
+    UPLOAD_FAIL(500, "上传文件失败");
 
 
     public int code;

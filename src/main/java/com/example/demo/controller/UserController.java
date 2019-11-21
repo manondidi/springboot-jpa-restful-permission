@@ -92,7 +92,7 @@ public class UserController {
     }
 
 
-    @PostMapping("/roles/")
+    @PostMapping("/roles")
     @RequiresPermissions("role:add")
     public Result<Role> addRole(@RequestParam String name, @RequestParam String desc, @RequestParam String[] permissionIds) {
         return Result.success(userService.addRole(name, desc, Arrays.asList(permissionIds)));
@@ -106,7 +106,7 @@ public class UserController {
         return Result.success();
     }
 
-    @GetMapping("/roles/")
+    @GetMapping("/roles")
     @RequiresPermissions("role:view")
     public Result<List<com.example.demo.pojo.dto.Role>> getRoles() {
         return Result.success(userService.getRoles());
@@ -124,13 +124,13 @@ public class UserController {
         return Result.success(userService.editRole(id, name, desc, available, Arrays.asList(permissionIds)));
     }
 
-    @GetMapping("/permissions/")
+    @GetMapping("/permissions")
     @RequiresPermissions("permission:view")
     public Result<List<Permission>> getAllPermisstionsTree() {
         return Result.success(userService.getAllPermissionsTree());
     }
 
-    @PostMapping("/permissions/")
+    @PostMapping("/permissions")
     @RequiresPermissions("permission:add")
     public Result<Permission> addPermisstion(@RequestParam String name,
                                              @RequestParam String permission,

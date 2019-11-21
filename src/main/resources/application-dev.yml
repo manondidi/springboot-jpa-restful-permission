@@ -23,11 +23,17 @@ spring:
     show-sql: true
   jackson:
     default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: true
 
 server:
   port: 8080
   servlet:
     context-path: /springboot-mvc-jpa-demo
+    session:
+      #7天
+      timeout: 604800s
+
 
 logging:
   config: classpath:log4j2.xml

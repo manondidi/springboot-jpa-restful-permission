@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -15,5 +16,7 @@ public class User {
     private String mail;
     private String tel;
     private String avatar;
+    private Date banTime;
+    private String banReason;
     private List<com.example.demo.pojo.po.Role> roleList;
 }

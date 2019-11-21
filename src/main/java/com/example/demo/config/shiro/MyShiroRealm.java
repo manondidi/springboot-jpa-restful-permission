@@ -5,6 +5,7 @@ import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.po.User;
 import com.example.demo.service.UserService;
+import jdk.nashorn.internal.runtime.options.Option;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -16,7 +17,10 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -46,10 +50,14 @@ public class MyShiroRealm extends AuthorizingRealm {
         if (userPo == null || !userPo.getPassword().equals(password)) {
             throw new AccountException("用户名或密码错误");
         }
+        if (userPo != null && Optional.ofNullable(userPo.getBanTime()).orElse(new Date(0)).after(new Date())) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            throw new AccountException(String.format("该用户因{%s}被封停至{%s}", userPo.getBanReason(), sdf.format(userPo.getBanTime())));
+        }
         return new SimpleAuthenticationInfo(userPo, userPo.getPassword(), getName());
     }
 
-    public void clearAuthz(){
+    public void clearAuthz() {
         this.clearCachedAuthorizationInfo(SecurityUtils.getSubject().getPrincipals());
     }
 
@@ -57,8 +65,8 @@ public class MyShiroRealm extends AuthorizingRealm {
      * shiro刷新权限
      */
     public static void reloadAuthorizing() {
-        RealmSecurityManager rsm = (RealmSecurityManager)SecurityUtils.getSecurityManager();
-        MyShiroRealm realm = (MyShiroRealm)rsm.getRealms().iterator().next();
+        RealmSecurityManager rsm = (RealmSecurityManager) SecurityUtils.getSecurityManager();
+        MyShiroRealm realm = (MyShiroRealm) rsm.getRealms().iterator().next();
         realm.clearAuthz();
     }
 }
