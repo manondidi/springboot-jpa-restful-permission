@@ -5,7 +5,6 @@ import com.example.demo.pojo.po.Permission;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.po.User;
 import com.example.demo.service.UserService;
-import jdk.nashorn.internal.runtime.options.Option;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;

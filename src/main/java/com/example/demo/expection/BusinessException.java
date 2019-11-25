@@ -1,6 +1,5 @@
 package com.example.demo.expection;
 
-import jdk.nashorn.internal.objects.annotations.Constructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
