@@ -6,13 +6,13 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/springboot-mvc-jpa?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://192.168.56.101:3306/springboot-mvc-jpa?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   redis:
-    host: 127.0.0.1
+    host: 192.168.56.101
     port: 6379
     timeout: 10000
 
@@ -25,6 +25,22 @@ spring:
     default-property-inclusion: always
     serialization:
       write-dates-as-timestamps: true
+
+
+
+fdfs:
+  # 链接超时
+  connect-timeout: 60
+  # 读取时间
+  so-timeout: 60
+  # 生成缩略图参数
+  thumb-image:
+    width: 150
+    height: 150
+  tracker-list: 192.168.56.101:22122
+
+file-server:
+  path: http://192.168.56.101:8080
 
 server:
   port: 8080

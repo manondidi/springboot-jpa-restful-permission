@@ -20,6 +20,9 @@ public class BusinessException extends RuntimeException {
     public BusinessException(BusinessExceptionEnum exceptionEnum) {
         this(exceptionEnum.code, exceptionEnum.message);
     }
+    public BusinessException(BusinessExceptionEnum exceptionEnum,String exceptinoMessage) {
+        this(exceptionEnum.code, String.format("%s: %s",exceptionEnum.message,exceptinoMessage));
+    }
 
     public BusinessException(BusinessExceptionEnum exceptionEnum, Object data) {
         this(exceptionEnum.code, exceptionEnum.message);
