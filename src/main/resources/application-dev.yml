@@ -48,7 +48,7 @@ server:
     context-path: /springboot-mvc-jpa-demo
     session:
       #7天
-      timeout: 604800s
+      timeout: 7D
 
 
 logging:

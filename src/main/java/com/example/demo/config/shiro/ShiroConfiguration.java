@@ -56,7 +56,7 @@ public class ShiroConfiguration {
     public SessionManager sessionManager() {
         MySessionManager mySessionManager = new MySessionManager();
         mySessionManager.setSessionDAO(redisSessionDAO());
-        mySessionManager.setGlobalSessionTimeout(sessionTimeout.getSeconds());
+        mySessionManager.setGlobalSessionTimeout(sessionTimeout.getSeconds()*1000);
         return mySessionManager;
     }
 
@@ -78,7 +78,6 @@ public class ShiroConfiguration {
     public RedisSessionDAO redisSessionDAO() {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
-
         return redisSessionDAO;
     }
 
