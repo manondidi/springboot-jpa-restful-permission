@@ -10,10 +10,12 @@ import org.crazycake.shiro.RedisManager;
 import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -22,6 +24,9 @@ public class ShiroConfiguration {
 
     @Autowired
     RedisProperties redisProperties;
+
+    @Value("${server.servlet.session.timeout}")
+    public Duration  sessionTimeout;
 
     @Bean
     public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager) {
@@ -51,6 +56,7 @@ public class ShiroConfiguration {
     public SessionManager sessionManager() {
         MySessionManager mySessionManager = new MySessionManager();
         mySessionManager.setSessionDAO(redisSessionDAO());
+        mySessionManager.setGlobalSessionTimeout(sessionTimeout.getSeconds());
         return mySessionManager;
     }
 
@@ -72,6 +78,7 @@ public class ShiroConfiguration {
     public RedisSessionDAO redisSessionDAO() {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
+
         return redisSessionDAO;
     }
 
