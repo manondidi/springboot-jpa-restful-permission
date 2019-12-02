@@ -197,9 +197,26 @@ public class UserServiceImpl implements UserService {
     public User getUser(String id) {
         com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
-
         return dozerMapper.map(userPo, User.class);
     }
 
+    @Override
+    public User ban(String id,String banReason,long banDate) {
+        com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
+        userPo.setBanReason(banReason);
+        userPo.setBanTime(new Date(banDate));
+        userRepository.saveAndFlush(userPo);
+        return dozerMapper.map(userPo, User.class);
+    }
 
+    @Override
+    public User unban(String id) {
+        com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
+        userPo.setBanReason("");
+        userPo.setBanTime(new Date(0));
+        userRepository.saveAndFlush(userPo);
+        return dozerMapper.map(userPo, User.class);
+    }
 }

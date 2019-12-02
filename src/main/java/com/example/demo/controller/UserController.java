@@ -145,4 +145,24 @@ public class UserController {
         userService.deletePermissions(id);
         return Result.success();
     }
+
+    @PutMapping("/users/{userId}/ban")
+    @RequiresPermissions("user:ban")
+    public Result<User> banUser(@PathVariable String userId,@RequestParam long banDate,@RequestParam String banReason){
+        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (currentUser.getId().equals(userId)){
+            throw new BusinessException(BusinessExceptionEnum.USER_CAN_NOT_BAN_SELF);
+        }
+        return Result.success(userService.ban(userId,banReason,banDate));
+    }
+
+    @PutMapping("/users/{userId}/unban")
+    @RequiresPermissions("user:unBan")
+    public Result<User> unbanUser(@PathVariable String userId){
+        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (currentUser.getId().equals(userId)){
+            throw new BusinessException(BusinessExceptionEnum.USER_CAN_NOT_UNBAN_SELF);
+        }
+        return Result.success(userService.unban(userId));
+    }
 }

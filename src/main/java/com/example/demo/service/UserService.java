@@ -33,4 +33,8 @@ public interface UserService {
     User editUserRole(String userId, List<String> roleIds);
 
     User getUser(String id);
+
+    User ban(String id, String banReason, long banDate);
+
+    User unban(String id);
 }
