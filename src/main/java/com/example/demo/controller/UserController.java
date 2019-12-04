@@ -157,7 +157,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}/unban")
-    @RequiresPermissions("user:unBan")
+    @RequiresPermissions("user:unban")
     public Result<User> unbanUser(@PathVariable String userId){
         com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
         if (currentUser.getId().equals(userId)){
