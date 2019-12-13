@@ -201,7 +201,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User ban(String id,String banReason,long banDate) {
+    public User ban(String id, String banReason, long banDate) {
         com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
         userPo.setBanReason(banReason);
@@ -218,5 +218,20 @@ public class UserServiceImpl implements UserService {
         userPo.setBanTime(new Date(0));
         userRepository.saveAndFlush(userPo);
         return dozerMapper.map(userPo, User.class);
+    }
+
+    @Override
+    public void changePassword(String userId, String oldPassword, String newPassword) {
+        com.example.demo.pojo.po.User userPo = userRepository.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new BusinessException(BusinessExceptionEnum.USER_NOT_FOUND));
+        if (!userPo.getPassword().equals(oldPassword)) {
+            throw new BusinessException(BusinessExceptionEnum.CHANGE_PASSWORD_WRONG_OLDPASSWORD);
+        }
+        if (newPassword.length()<6) {
+            throw new BusinessException(BusinessExceptionEnum.CHANGE_PASSWORD_FAIL,"新密码不能小于6位数");
+        }
+        userPo.setPassword(newPassword);
+        userRepository.saveAndFlush(userPo);
+
     }
 }

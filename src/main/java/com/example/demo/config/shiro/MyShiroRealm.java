@@ -14,6 +14,7 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
@@ -31,8 +32,9 @@ public class MyShiroRealm extends AuthorizingRealm {
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-        User user = (User) principalCollection.getPrimaryPrincipal();
-        for (Role role : user.getRoleList()) {
+        String userIdStr = (String) principalCollection.getPrimaryPrincipal();
+        User userPo = userRepository.findById(Long.parseLong(userIdStr)).get();
+        for (Role role : userPo.getRoleList()) {
             authorizationInfo.addRole(role.getName());
             for (Permission p : role.getPermissions()) {
                 authorizationInfo.addStringPermission(p.getPermission());
@@ -49,23 +51,44 @@ public class MyShiroRealm extends AuthorizingRealm {
         if (userPo == null || !userPo.getPassword().equals(password)) {
             throw new AccountException("用户名或密码错误");
         }
-        if (userPo != null && Optional.ofNullable(userPo.getBanTime()).orElse(new Date(0)).after(new Date())) {
+        if (Optional.ofNullable(userPo.getBanTime()).orElse(new Date(0)).after(new Date())) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            throw new AccountException(String.format("该用户因{%s}被封停至{%s}", userPo.getBanReason(), sdf.format(userPo.getBanTime())));
+            throw new DisabledAccountException(String.format("该用户因{%s}被封停至{%s}", userPo.getBanReason(), sdf.format(userPo.getBanTime())));
         }
-        return new SimpleAuthenticationInfo(userPo, userPo.getPassword(), getName());
-    }
-
-    public void clearAuthz() {
-        this.clearCachedAuthorizationInfo(SecurityUtils.getSubject().getPrincipals());
+        return new SimpleAuthenticationInfo(userPo.getId().toString(), userPo.getPassword(), getName());
     }
 
     /**
-     * shiro刷新权限
+     * 删除所有人的授权cache 使其再走一次doGetAuthorizationInfo
+     */
+
+    public void clearAuthorization() {
+        this.getAuthenticationCache().clear();
+    }
+
+
+    /**
+     * @param userId 删除某个人的信息 使其需要重新输入用户名密码登陆
+     */
+    public void clearAuthentication(String userId) {
+        this.clearCache(new SimplePrincipalCollection(userId, getName()));
+    }
+
+    /**
+     * shiro刷新所有人权限
      */
     public static void reloadAuthorizing() {
         RealmSecurityManager rsm = (RealmSecurityManager) SecurityUtils.getSecurityManager();
         MyShiroRealm realm = (MyShiroRealm) rsm.getRealms().iterator().next();
-        realm.clearAuthz();
+        realm.clearAuthorization();
+    }
+
+    /**
+     * shiro清除该用户所有token 用于修改密码后过期该用户所有token
+     */
+    public static void removeUser(String userId) {
+        RealmSecurityManager rsm = (RealmSecurityManager) SecurityUtils.getSecurityManager();
+        MyShiroRealm realm = (MyShiroRealm) rsm.getRealms().iterator().next();
+        realm.clearAuthentication(userId);
     }
 }

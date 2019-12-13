@@ -37,4 +37,6 @@ public interface UserService {
     User ban(String id, String banReason, long banDate);
 
     User unban(String id);
+
+    void changePassword(String userId, String oldPassword, String newPassword);
 }

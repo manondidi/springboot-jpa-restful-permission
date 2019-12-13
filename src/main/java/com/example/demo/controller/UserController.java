@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 
+import com.example.demo.config.shiro.MyShiroRealm;
 import com.example.demo.expection.BusinessException;
 import com.example.demo.expection.BusinessExceptionEnum;
 import com.example.demo.pojo.dto.PageInfo;
@@ -10,7 +11,6 @@ import com.example.demo.pojo.dto.User;
 import com.example.demo.pojo.po.Role;
 import com.example.demo.pojo.vo.Result;
 import com.example.demo.service.UserService;
-import com.github.dozermapper.core.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -21,7 +21,6 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,8 +32,6 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @Resource
-    private Mapper dozerMapper;
 
     @PostMapping("/login")
     public Result<Token> login(@RequestParam String user, @RequestParam String password) {
@@ -53,8 +50,8 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public Result<User> getUser(@PathVariable String id) {
-        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
-        if (Long.parseLong(id) == (currentUser.getId())) {
+        String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (currentUserId.equals(id)) {
             return getCurrentUser();
         } else if (SecurityUtils.getSubject().isPermitted("user:view")) {
             return Result.success(userService.getUser(id));
@@ -67,14 +64,13 @@ public class UserController {
     @GetMapping("/currentUser")
     @RequiresAuthentication
     public Result<User> getCurrentUser() {
-        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
-        User userDto = dozerMapper.map(currentUser, User.class);
-        return Result.success(userDto);
+        String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        return Result.success(userService.getUser(currentUserId));
     }
 
     @PostMapping("/logout")
     @RequiresAuthentication
-    public Result<Void> logout() {
+    public Result logout() {
         SecurityUtils.getSubject().logout();
         return Result.success();
     }
@@ -101,7 +97,7 @@ public class UserController {
 
     @DeleteMapping("/roles/{id}")
     @RequiresPermissions("role:delete")
-    public Result<Void> deleteRole(@PathVariable String id) {
+    public Result deleteRole(@PathVariable String id) {
         userService.deleteRole(id);
         return Result.success();
     }
@@ -141,28 +137,39 @@ public class UserController {
 
     @DeleteMapping("/permissions/{id}")
     @RequiresPermissions("permission:delete")
-    public Result<Void> deletePermisstions(@PathVariable String id) {
+    public Result deletePermisstions(@PathVariable String id) {
         userService.deletePermissions(id);
         return Result.success();
     }
 
     @PutMapping("/users/{userId}/ban")
     @RequiresPermissions("user:ban")
-    public Result<User> banUser(@PathVariable String userId,@RequestParam long banDate,@RequestParam String banReason){
-        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
-        if (currentUser.getId().equals(userId)){
+    public Result<User> banUser(@PathVariable String userId, @RequestParam long banDate, @RequestParam String banReason) {
+        String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (currentUserId.equals(userId)) {
             throw new BusinessException(BusinessExceptionEnum.USER_CAN_NOT_BAN_SELF);
         }
-        return Result.success(userService.ban(userId,banReason,banDate));
+        User user = userService.ban(userId, banReason, banDate);
+        MyShiroRealm.removeUser(user.getId().toString());
+        return Result.success(user);
     }
 
     @PutMapping("/users/{userId}/unban")
     @RequiresPermissions("user:unban")
-    public Result<User> unbanUser(@PathVariable String userId){
-        com.example.demo.pojo.po.User currentUser = (com.example.demo.pojo.po.User) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
-        if (currentUser.getId().equals(userId)){
+    public Result<User> unbanUser(@PathVariable String userId) {
+        String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        if (currentUserId.equals(userId)) {
             throw new BusinessException(BusinessExceptionEnum.USER_CAN_NOT_UNBAN_SELF);
         }
         return Result.success(userService.unban(userId));
+    }
+
+    @PutMapping("/users/password")
+    @RequiresAuthentication
+    public Result changePassword(String oldPassword, String newPassword) {
+        String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
+        userService.changePassword(currentUserId, oldPassword, newPassword);
+        MyShiroRealm.removeUser(currentUserId);
+        return Result.success();
     }
 }

@@ -3,6 +3,8 @@ package com.example.demo.expection;
 public enum BusinessExceptionEnum {
     LOGIN_FAIL(400, "登录失败"),
     USER_UNLOGIN(400, "用户未登录"),
+    CHANGE_PASSWORD_WRONG_OLDPASSWORD(500, "旧密码输入错误"),
+    CHANGE_PASSWORD_FAIL(500, "修改密码失败"),
     USER_NOT_FOUND(404, "用户不存在"),
     USER_CAN_NOT_BAN_SELF(500, "不能自我封禁"),
     USER_CAN_NOT_UNBAN_SELF(500, "不能自我解封"),
