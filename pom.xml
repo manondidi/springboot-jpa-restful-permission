@@ -2,6 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
+        </repository>
+    </repositories>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -54,7 +60,7 @@
         <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-spring</artifactId>
-            <version>1.4.1</version>
+            <version>1.4.2</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -109,11 +115,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.crazycake</groupId>
-            <artifactId>shiro-redis</artifactId>
-            <version>3.2.3</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.crazycake</groupId>-->
+<!--            <artifactId>shiro-redis</artifactId>-->
+<!--            <version>3.2.3</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.github.tobato</groupId>
@@ -130,6 +136,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.manondidi</groupId>
+            <artifactId>shiro-redis</artifactId>
+            <version>3.2.10</version>
         </dependency>
 
     </dependencies>

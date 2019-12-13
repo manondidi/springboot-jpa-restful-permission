@@ -150,7 +150,7 @@ public class UserController {
             throw new BusinessException(BusinessExceptionEnum.USER_CAN_NOT_BAN_SELF);
         }
         User user = userService.ban(userId, banReason, banDate);
-        MyShiroRealm.removeUser(user.getId().toString());
+        MyShiroRealm.removeUser(currentUserId);
         return Result.success(user);
     }
 
@@ -166,7 +166,7 @@ public class UserController {
 
     @PutMapping("/users/password")
     @RequiresAuthentication
-    public Result changePassword(String oldPassword, String newPassword) {
+    public Result changePassword( @RequestParam String oldPassword,  @RequestParam String newPassword) {
         String currentUserId = (String) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal();
         userService.changePassword(currentUserId, oldPassword, newPassword);
         MyShiroRealm.removeUser(currentUserId);

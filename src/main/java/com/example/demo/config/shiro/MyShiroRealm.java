@@ -13,21 +13,24 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.mgt.RealmSecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Data
 public class MyShiroRealm extends AuthorizingRealm {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    RedisSessionDAO redisSessionDAO;
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
@@ -66,13 +69,20 @@ public class MyShiroRealm extends AuthorizingRealm {
         this.getAuthenticationCache().clear();
     }
 
+    public void removeUserSession(String userId) {
+        Collection<Session> sessions = redisSessionDAO.getActiveSessions();
+        for (Session session : sessions) {
+            Object obj = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+            if (obj instanceof SimplePrincipalCollection) {
+                SimplePrincipalCollection spc = (SimplePrincipalCollection) obj;
+                if (userId.equals(spc.getPrimaryPrincipal())) {
+                    redisSessionDAO.delete(session);
+                }
+            }
 
-    /**
-     * @param userId 删除某个人的信息 使其需要重新输入用户名密码登陆
-     */
-    public void clearAuthentication(String userId) {
-        this.clearCache(new SimplePrincipalCollection(userId, getName()));
+        }
     }
+
 
     /**
      * shiro刷新所有人权限
@@ -89,6 +99,7 @@ public class MyShiroRealm extends AuthorizingRealm {
     public static void removeUser(String userId) {
         RealmSecurityManager rsm = (RealmSecurityManager) SecurityUtils.getSecurityManager();
         MyShiroRealm realm = (MyShiroRealm) rsm.getRealms().iterator().next();
-        realm.clearAuthentication(userId);
+        realm.removeUserSession(userId);
+
     }
 }
