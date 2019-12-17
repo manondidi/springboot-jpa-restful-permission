@@ -66,21 +66,16 @@ public class MyShiroRealm extends AuthorizingRealm {
      */
 
     public void clearAuthorization() {
-        this.getAuthenticationCache().clear();
+        this.getAuthorizationCache().clear();
     }
 
     public void removeUserSession(String userId) {
-        Collection<Session> sessions = redisSessionDAO.getActiveSessions();
-        for (Session session : sessions) {
-            Object obj = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
-            if (obj instanceof SimplePrincipalCollection) {
-                SimplePrincipalCollection spc = (SimplePrincipalCollection) obj;
-                if (userId.equals(spc.getPrimaryPrincipal())) {
-                    redisSessionDAO.delete(session);
-                }
-            }
-
-        }
+        redisSessionDAO.getActiveSessions().stream()
+                .filter(session -> {
+                    return session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY) instanceof SimplePrincipalCollection
+                            &&
+                            userId.equals(((SimplePrincipalCollection) session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY)).getPrimaryPrincipal());
+                }).forEach(redisSessionDAO::delete);
     }
 
 
