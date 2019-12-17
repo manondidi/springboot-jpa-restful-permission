@@ -13,7 +13,7 @@ sql结构文件是***springboot-mvc-jpa.sql***
 
 相关测试接口 postman 分享地址 https://www.getpostman.com/collections/e67dcdbc28ed45423964  
 请使用postman的 Import功能导入接口
-请配置postman变量 token 和serverUrl,token是访问login方法后返回的token
+**请配置postman变量 token 和serverUrl,token是访问login方法后返回的token**
 
 
 ![](截图/1.png)
